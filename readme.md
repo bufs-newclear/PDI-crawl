@@ -9,9 +9,10 @@ https://github.com/ltlapy/bufs_shikdan_parse 을 기반으로 하고 있습니�
 pip install -r requirements.txt
 python3 main.py
 ```
-실행 시 단회성으로 동기화를 실행하며, 주기적으로 동기화하려는 경우 운영체제의 cronjob 등을 통해 정기적으로 실행시킬 필요가 있습니다.
+실행 시 1회성으로 동기화를 실행하며, 주기적으로 동기화하려는 경우 운영체제의 cronjob 등을 통해 정기적으로 실행시킬 필요가 있습니다.
 
 ### TODO
-- [ ] REST API를 통한 데이터 인계
-  - [ ] 실행 로직 재설계
-  - [ ] 환경 변수 설정
+- [x] REST API를 통한 데이터 인계
+  - [x] 실행 로직 재설계
+  - [x] 환경 변수 설정
+- [ ] 마지막 갱신 시간의 대조
