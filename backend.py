@@ -1,39 +1,55 @@
 from get_meal import BUFSMeals
 import requests
-import json
-import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional, Union, Literal
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+DISCORD_WEBHOOK_URL = os.getenv('DISCORD_WEBHOOK_URL')
+
+def send_discord_message(message):
+    """디스코드 웹훅을 사용하여 메시지를 보냅니다."""
+    requests.post(DISCORD_WEBHOOK_URL, data={'content': message})
 
 def get_token(url: str, username: str, password: str) -> str:
     """사용자명과 패스워드를 이용하여 인증 토큰을 취득합니다."""
-    res = requests.post(
-        f"{url}/users/login/",
-        json={
-            "username": username,
-            "password": password
-        }
-    )
+    try:
+        res = requests.post(
+            f"{url}/users/login/",
+            json={
+                "username": username,
+                "password": password
+            }
+        )
 
-    if not res.ok:
-        raise ConnectionError(f"연결에 문제가 발생하였습니다 [{res.status_code}]: {res.reason}")
-    else:
-        return res.json()['token']
+        if not res.ok:
+            raise ConnectionError(f"연결에 문제가 발생하였습니다 [{res.status_code}]: {res.reason}")
+        else:
+            return res.json()['token']
+    except Exception as e:
+        send_discord_message(f"토큰 취득 중 오류 발생: {str(e)}")
+        raise
 
 
 def get_meals(url, since_date: Optional[datetime] = None, until_date: Optional[datetime] = None):
-    res = requests.get(
-        f"{url}/meals/meal/",
-        params={
-            "sinceDate": since_date.strftime('%Y-%m-%d') if since_date else None,
-            "untilDate": until_date.strftime('%Y-%m-%d') if until_date else None
-        }
-    )
+    try:
+        res = requests.get(
+            f"{url}/meals/meal/",
+            params={
+                "sinceDate": since_date.strftime('%Y-%m-%d') if since_date else None,
+                "untilDate": until_date.strftime('%Y-%m-%d') if until_date else None
+            }
+        )
 
-    if not res.ok:
-        raise ConnectionError(f"연결에 문제가 발생하였습니다 [{res.status_code}]: {res.reason}")
-    else:
-        return res.json()
+        if not res.ok:
+            # 식당정보 연결실패
+            raise ConnectionError(f"연결에 문제가 발생하였습니다 [{res.status_code}]: {res.reason}")
+        else:
+            return res.json()
+    except Exception as e:
+        send_discord_message(f"식당 정보 조회 중 오류 발생: {str(e)}")
+        raise
 
 def post_meal(
         url: str,
@@ -41,20 +57,24 @@ def post_meal(
         name: str, 
         meal_type: Union[Literal['morning'], Literal['lunch'], Literal['employee']], 
         token: str):
-    res = requests.post(
-        f"{url}/meals/meal/",
-        headers={ "Authorization": f"Token {token}" },
-        json={
-            "date": date.strftime("%Y-%m-%d"),
-            "name": name,
-            "meal_type": meal_type
-        }
-    )
+    try:
+        res = requests.post(
+            f"{url}/meals/meal/",
+            headers={ "Authorization": f"Token {token}" },
+            json={
+                "date": date.strftime("%Y-%m-%d"),
+                "name": name,
+                "meal_type": meal_type
+            }
+        )
 
-    if not res.ok:
-        raise ConnectionError(f"연결에 문제가 발생하였습니다 [{res.status_code}]: {res.reason}")
-    else:
-        return res.json()
+        if not res.ok:
+            raise ConnectionError(f"연결에 문제가 발생하였습니다 [{res.status_code}]: {res.reason}")
+        else:
+            return res.json()
+    except Exception as e:
+        send_discord_message(f"식사 등록 중 오류 발생: {str(e)}")
+        raise
 
 def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
     token = get_token(url, username, password)
@@ -96,3 +116,5 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
                 meal_type="lunch",
                 token=token
             )
+    
+    send_discord_message(f"{len(daily_meals)} 개의 식단이 추가되었습니다 (${start} - ${end})")
