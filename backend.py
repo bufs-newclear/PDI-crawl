@@ -105,7 +105,8 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
         # lunch
         for meal in daily_meals["lunch"]:
             if meal["corner"] == "공통찬" or \
-               meal["menu"] in ["자장(면/밥) +탕수육", "짬뽕(면/밥) +탕수육", "탕수육"]:
+               meal["corner"] == "분식" or \
+               meal["menu"] in ["자장(면/밥) +탕수육", "짬뽕(면/밥) +탕수육", "탕수육", "옛날돈까스"]:
                 continue
 
             print(meal["menu"])
