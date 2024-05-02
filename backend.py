@@ -118,5 +118,16 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
                 meal_type="lunch",
                 token=token
             )
+        
+        # employee
+        employee = daily_meals["employee"]
+        print(employee)
+        post_meal(
+            url=url,
+            date=date,
+            name=employee,
+            meal_type="employee",
+            token=token
+        )
     
     send_discord_message(f"{len(daily_meals)} 개의 식단이 추가되었습니다 (${start} - ${end})")

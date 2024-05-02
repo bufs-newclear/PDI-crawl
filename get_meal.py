@@ -120,6 +120,32 @@ class BUFSMeals:
             
             daily_meals['lunch'] = lunches
             weekly_meals.append(daily_meals)
+            
+        # * 교직원식당  #########################
+        employee = {}
+        for row in tbls[-1].find_all('tr')[1:]:  # 첫 번째는 제목이다
+            daily_employee = {}
+            
+            # 날짜
+            date = row.find_all(recursive=False)[0].text.strip()
+            meal_date = datetime.strptime(normalize('NFC', date)[:-3], '%m/%d').date() or None
+            meal_date = meal_date.replace(year=datetime.today().year)
+            daily_employee['datestring'] = normalize('NFC', date)
+            daily_employee['date'] = meal_date
+            
+            # 식단
+            meal_menu = normalize('NFC', row.find_all(recursive=False)[2].text.strip())
+            while(meal_menu[0] in '\ufeff\u200b '): meal_menu = meal_menu[1:]  # 불필요한 문자열 제거
+            daily_employee['menu'] = meal_menu
+            
+            employee[meal_date] = daily_employee
+        
+        # 중식에서 찾아서 넣는다
+        for daily_meals in weekly_meals:
+            daily_employee = employee.pop(daily_meals['date'], None)
+            if daily_employee is None: continue
+            daily_meals['employee'] = daily_employee['menu']
+            
 
         self.weekly_meals = weekly_meals
         self.last_updated = datetime.now()
