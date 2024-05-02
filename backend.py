@@ -87,7 +87,8 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
     print(existing_meals)
 
     if len(existing_meals) != 0:
-        raise ValueError(f"해당 날짜에 이미 데이터가 존재합니다.\n{start}-{end}: {existing_meals}")
+        print(f"해당 날짜에 이미 데이터가 존재합니다.\n{start}-{end}: {len(existing_meals)}")
+        return
     
     for daily_meals in weekly_meals:
         date = daily_meals["date"]
