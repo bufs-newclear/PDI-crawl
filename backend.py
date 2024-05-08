@@ -2,15 +2,8 @@ from get_meal import BUFSMeals
 import requests
 from datetime import datetime
 from typing import Optional, Union, Literal
-from dotenv import load_dotenv
-import os
+from misc import send_discord_message
 
-load_dotenv()
-DISCORD_WEBHOOK_URL = os.getenv('DISCORD_WEBHOOK_URL')
-
-def send_discord_message(message):
-    """디스코드 웹훅을 사용하여 메시지를 보냅니다."""
-    requests.post(DISCORD_WEBHOOK_URL, data={'content': message})
 
 def get_token(url: str, username: str, password: str) -> str:
     """사용자명과 패스워드를 이용하여 인증 토큰을 취득합니다."""
@@ -51,16 +44,17 @@ def get_meals(url, since_date: Optional[datetime] = None, until_date: Optional[d
         send_discord_message(f"식당 정보 조회 중 오류 발생: {str(e)}")
         raise
 
+
 def post_meal(
         url: str,
-        date: datetime, 
-        name: str, 
+        date: datetime,
+        name: str,
         meal_type: Union[Literal['morning'], Literal['lunch'], Literal['employee']], 
         token: str):
     try:
         res = requests.post(
             f"{url}/meals/meal/",
-            headers={ "Authorization": f"Token {token}" },
+            headers={"Authorization": f"Token {token}"},
             json={
                 "date": date.strftime("%Y-%m-%d"),
                 "name": name,
@@ -76,20 +70,21 @@ def post_meal(
         send_discord_message(f"식사 등록 중 오류 발생: {str(e)}")
         raise
 
+
 def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
     token = get_token(url, username, password)
     weekly_meals = sorted(meals.weekly_meals, key=lambda x: x["date"])
-    
+
     # 중복 제거를 위해 기존의 리스트를 가져온다
     start = weekly_meals[0]["date"]
-    end   = weekly_meals[-1]["date"]
+    end = weekly_meals[-1]["date"]
     existing_meals = get_meals(url, since_date=start, until_date=end)
     print(existing_meals)
 
     if len(existing_meals) != 0:
         print(f"해당 날짜에 이미 데이터가 존재합니다.\n{start}-{end}: {len(existing_meals)}")
         return
-    
+
     for daily_meals in weekly_meals:
         date = daily_meals["date"]
         # morning
