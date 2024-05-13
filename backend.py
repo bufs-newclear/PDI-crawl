@@ -85,6 +85,7 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
         print(f"해당 날짜에 이미 데이터가 존재합니다.\n{start}-{end}: {len(existing_meals)}")
         return
 
+    meal_count = 0
     for daily_meals in weekly_meals:
         date = daily_meals["date"]
         # morning
@@ -97,6 +98,7 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
             meal_type="morning",
             token=token
         )
+        meal_count += 1
 
         # lunch
         for meal in daily_meals["lunch"]:
@@ -113,6 +115,7 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
                 meal_type="lunch",
                 token=token
             )
+            meal_count += 1
         
         # employee
         employee = daily_meals["employee"]
@@ -124,5 +127,6 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
             meal_type="employee",
             token=token
         )
+        meal_count += 1
     
-    send_discord_message(f"{len(daily_meals)} 개의 식단이 추가되었습니다 (${start} - ${end})")
+    send_discord_message(f"{len(daily_meals)} 일에 대한 식단 {meal_count}건이 추가되었습니다 ({start} - {end})")

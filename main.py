@@ -15,7 +15,7 @@ def main():
         # breakfast
         breakfast = daily_meals['breakfast'][0]['menu'].strip()
         if breakfast in ['-', '미운영']:
-            send_discord_message(f"{daily_meals['datestring']} 의 조식이 미운영입니다 (${breakfast})")
+            send_discord_message(f"{daily_meals['datestring']} 의 조식이 미운영입니다 (\`{breakfast}\`)")
 
         # lunch
         lunch = [meal['menu'].strip() for meal in daily_meals["lunch"]]
@@ -25,7 +25,7 @@ def main():
         # employee
         employee = daily_meals['employee'].strip()
         if employee in ['-', '미운영']:
-            send_discord_message(f"{daily_meals['datestring']} 의 교직원식당이 미운영입니다 (${breakfast})")
+            send_discord_message(f"{daily_meals['datestring']} 의 교직원식당이 미운영입니다 (\`{breakfast}\`)")
 
     # 백엔드 서버로 전송
     send_to_backend(
