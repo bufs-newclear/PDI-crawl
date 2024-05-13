@@ -18,7 +18,7 @@ def main():
             send_discord_message(f"{daily_meals['datestring']} 의 조식이 미운영입니다 (${breakfast})")
 
         # lunch
-        lunch = [meal.menu.strip() for meal in daily_meals["lunch"]]
+        lunch = [meal['menu'].strip() for meal in daily_meals["lunch"]]
         if '미운영' in lunch:
             send_discord_message(f"{daily_meals['datestring']} 의 학생식당이 미운영입니다")
 
