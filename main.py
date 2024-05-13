@@ -13,18 +13,17 @@ def main():
     # 미운영 검사
     for daily_meals in meals.get_weekly():
         # breakfast
-        breakfast = daily_meals['breakfast'][0]['menu'].strip()
-        if breakfast in ['-', '미운영']:
+        breakfast = daily_meals['breakfast']
+        if len(breakfast) == 0 or breakfast[0]['menu'].strip() in ['-', '미운영']:
             send_discord_message(f"{daily_meals['datestring']} 의 조식이 미운영입니다 (\`{breakfast}\`)")
 
         # lunch
-        lunch = [meal['menu'].strip() for meal in daily_meals["lunch"]]
-        if '미운영' in lunch:
+        lunch_names = [meal['menu'].strip() for meal in daily_meals["lunch"]]
+        if len(daily_meals['lunch']) == 0 or '미운영' in lunch_names:
             send_discord_message(f"{daily_meals['datestring']} 의 학생식당이 미운영입니다")
 
         # employee
-        employee = daily_meals['employee'].strip()
-        if employee in ['-', '미운영']:
+        if 'employee' not in daily_meals or daily_meals['employee'].strip() in ['-', '미운영']:
             send_discord_message(f"{daily_meals['datestring']} 의 교직원식당이 미운영입니다 (\`{breakfast}\`)")
 
     # 백엔드 서버로 전송

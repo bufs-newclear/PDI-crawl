@@ -89,16 +89,16 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
     for daily_meals in weekly_meals:
         date = daily_meals["date"]
         # morning
-        morning = daily_meals["breakfast"][0]
-        print(morning["menu"])
-        post_meal(
-            url=url,
-            date=date,
-            name=morning["menu"],
-            meal_type="morning",
-            token=token
-        )
-        meal_count += 1
+        for meal in daily_meals["breakfast"]:
+            print(meal["menu"])
+            post_meal(
+                url=url,
+                date=date,
+                name=meal["menu"],
+                meal_type="morning",
+                token=token
+            )
+            meal_count += 1
 
         # lunch
         for meal in daily_meals["lunch"]:
@@ -118,15 +118,16 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
             meal_count += 1
         
         # employee
-        employee = daily_meals["employee"]
-        print(employee)
-        post_meal(
-            url=url,
-            date=date,
-            name=employee,
-            meal_type="employee",
-            token=token
-        )
-        meal_count += 1
+        if 'employee' in daily_meals:
+            employee = daily_meals["employee"]
+            print(employee)
+            post_meal(
+                url=url,
+                date=date,
+                name=employee,
+                meal_type="employee",
+                token=token
+            )
+            meal_count += 1
     
     send_discord_message(f"{len(daily_meals)} 일에 대한 식단 {meal_count}건이 추가되었습니다 ({start} - {end})")

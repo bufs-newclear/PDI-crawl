@@ -78,7 +78,8 @@ class BUFSMeals:
                 menu = menu_td[-1].find(recursive=True).text.strip()
                 
                 # print(f'(조식) {corner.text.strip() or "CORNER ?"} : {menu.text.strip() or "???"}')
-                breakfasts.append({'menu': normalize('NFC', menu), 'corner': normalize('NFC', corner)})
+                if normalize('NFC', menu) not in ['-' or '미운영']:
+                    breakfasts.append({'menu': normalize('NFC', menu), 'corner': normalize('NFC', corner)})
             
             daily_meals['breakfast'] = breakfasts
             
@@ -117,7 +118,8 @@ class BUFSMeals:
                         corner = corner_candidate
 
                 # print(f'{corner or "CORNER ?"} : {menu or "???"}')
-                lunches.append({'corner': normalize('NFKC', corner), 'menu': normalize('NFC', menu)})
+                if normalize('NFC', menu) not in ['미운영', '-']:
+                    lunches.append({'corner': normalize('NFKC', corner), 'menu': normalize('NFC', menu)})
             
             daily_meals['lunch'] = lunches
             weekly_meals.append(daily_meals)
@@ -138,8 +140,9 @@ class BUFSMeals:
             meal_menu = normalize('NFC', row.find_all(recursive=False)[2].text.strip())
             while(meal_menu[0] in '\ufeff\u200b '): meal_menu = meal_menu[1:]  # 불필요한 문자열 제거
             daily_employee['menu'] = meal_menu
-            
-            employee[meal_date] = daily_employee
+
+            if meal_menu not in ['미운영', '-']:
+                employee[meal_date] = daily_employee
         
         # 중식에서 찾아서 넣는다
         for daily_meals in weekly_meals:
