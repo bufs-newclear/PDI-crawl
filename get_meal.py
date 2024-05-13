@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup as bs
 from unicodedata import normalize
 from datetime import datetime, timedelta
 from typing import Optional, List
-from types import Menu, DailyMenu
+from menu_types import Menu, DailyMenu
 
 
 class BUFSMeals:
