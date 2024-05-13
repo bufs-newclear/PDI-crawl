@@ -2,7 +2,8 @@ import requests
 from bs4 import BeautifulSoup as bs
 from unicodedata import normalize
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
+from types import Menu, DailyMenu
 
 
 class BUFSMeals:
@@ -15,19 +16,19 @@ class BUFSMeals:
         if fetch_on_init:
             self.refresh()
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
         if self.last_updated is None or datetime.now() - self.last_updated > timedelta(minutes=30):
             return False
         return True
     
 
-    def get_weekly(self):
+    def get_weekly(self) -> List[DailyMenu]:
         if not self.is_valid():
             self.refresh()
         return self.weekly_meals
 
 
-    def get_daily(self, date: Optional[datetime.date] = None):
+    def get_daily(self, date: Optional[datetime.date] = None) -> DailyMenu:
         if not self.is_valid():
             self.refresh()
         
@@ -36,7 +37,7 @@ class BUFSMeals:
                 return day
         return None
 
-    def refresh(self):
+    def refresh(self) -> None:
         page = requests.get(self.WEEKLY_MEAL_URL)
         if page.status_code != 200:
             raise ConnectionError(f"웹 페이지가 {page.status_code}를 반환했습니다")
