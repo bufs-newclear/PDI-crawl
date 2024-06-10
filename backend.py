@@ -71,7 +71,7 @@ def post_meal(
         raise
 
 
-def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
+def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str, force: bool = False):
     token = get_token(url, username, password)
     weekly_meals = sorted(meals.weekly_meals, key=lambda x: x["date"])
 
@@ -81,7 +81,7 @@ def send_to_backend(meals: BUFSMeals, url: str, username: str, password: str):
     existing_meals = get_meals(url, since_date=start, until_date=end)
     print(existing_meals)
 
-    if len(existing_meals) != 0:
+    if not force and len(existing_meals) != 0:
         print(f"해당 날짜에 이미 데이터가 존재합니다.\n{start}-{end}: {len(existing_meals)}")
         return
 
