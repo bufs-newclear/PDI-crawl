@@ -67,7 +67,7 @@ class BUFSMeals:
                 raise ValueError(f"날짜 파싱에 실패하였습니다. `{date_pattern}` 을 기대했으나, `{normalize('', title)}`이 삽입되었습니다.")
             d = date_match.groups()
             meal_date = datetime.strptime(f"{d[0]}-{d[1]}-{d[2]}", '%Y-%m-%d').date() or None
-            daily_meals['datestring'] = normalize('NFD', title)
+            daily_meals['datestring'] = normalize('NFC', title)
             daily_meals['date'] = meal_date
 
             # * 조식
@@ -84,8 +84,8 @@ class BUFSMeals:
                 menu = menu_td[-1].find(recursive=True).text.strip()
                 
                 # print(f'(조식) {corner.text.strip() or "CORNER ?"} : {menu.text.strip() or "???"}')
-                if normalize('NFD', menu) not in ['-' or '미운영']:
-                    breakfasts.append({'menu': normalize('NFD', menu), 'corner': normalize('NFD', corner)})
+                if normalize('NFC', menu) not in ['-' or '미운영']:
+                    breakfasts.append({'menu': normalize('NFC', menu), 'corner': normalize('NFC', corner)})
             
             daily_meals['breakfast'] = breakfasts
             
@@ -124,8 +124,8 @@ class BUFSMeals:
                         corner = corner_candidate
 
                 # print(f'{corner or "CORNER ?"} : {menu or "???"}')
-                if normalize('NFD', menu) not in ['미운영', '-']:
-                    lunches.append({'corner': normalize('NFKC', corner), 'menu': normalize('NFD', menu)})
+                if normalize('NFC', menu) not in ['미운영', '-']:
+                    lunches.append({'corner': normalize('NFKC', corner), 'menu': normalize('NFC', menu)})
             
             daily_meals['lunch'] = lunches
             weekly_meals.append(daily_meals)
@@ -141,15 +141,15 @@ class BUFSMeals:
             date_pattern = r'(\d+)/(\d+)'
             date_match = re.search(date_pattern, normalize('NFD', date))
             if not date_match:
-                raise ValueError(f"날짜 파싱에 실패하였습니다. `{date_pattern}` 을 기대했으나, `{normalize('NFD', date)}`이 삽입되었습니다.")
+                raise ValueError(f"날짜 파싱에 실패하였습니다. `{date_pattern}` 을 기대했으나, `{normalize('NFC', date)}`이 삽입되었습니다.")
             d = date_match.groups()
             meal_date = datetime.strptime(f"{d[0]}-{d[1]}", '%m-%d').date() or None
             meal_date = meal_date.replace(year=datetime.today().year)
-            daily_employee['datestring'] = normalize('NFD', date)
+            daily_employee['datestring'] = normalize('NFC', date)
             daily_employee['date'] = meal_date
             
             # 식단
-            meal_menu = normalize('NFD', row.find_all(recursive=False)[2].text.strip())
+            meal_menu = normalize('NFC', row.find_all(recursive=False)[2].text.strip())
             while(meal_menu[0] in '\ufeff\u200b '): meal_menu = meal_menu[1:]  # 불필요한 문자열 제거
             daily_employee['menu'] = meal_menu
 
