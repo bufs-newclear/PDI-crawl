@@ -4,6 +4,7 @@ from backend import send_to_backend
 from dotenv import load_dotenv
 from misc import send_discord_message
 import os
+from traceback import format_exception
 
 
 def main():
@@ -36,4 +37,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        send_discord_message(format_exception(e))
+        raise e

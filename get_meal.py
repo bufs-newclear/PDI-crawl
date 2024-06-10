@@ -1,8 +1,9 @@
 import requests
+import re
 from bs4 import BeautifulSoup as bs
 from unicodedata import normalize
 from datetime import datetime, timedelta
-from typing import Optional, List
+from typing import Optional, List, AnyStr
 from menu_types import Menu, DailyMenu
 
 
@@ -41,7 +42,6 @@ class BUFSMeals:
         page = requests.get(self.WEEKLY_MEAL_URL)
         if page.status_code != 200:
             raise ConnectionError(f"웹 페이지가 {page.status_code}를 반환했습니다")
-            return None
 
         soup = bs(page.text, "lxml")
         # tbls = soup.select('table.__se_tbl')
@@ -60,8 +60,14 @@ class BUFSMeals:
                 # print(title_td)
                 title = title_td.find_all(recursive=False)[-1].text.strip()
 
-            meal_date = datetime.strptime(normalize('NFC', title)[:-4], '%Y년 %m월 %d일').date() or None
-            daily_meals['datestring'] = normalize('NFC', title)
+            # 연월일 날짜 파싱
+            date_pattern = r'(\d+)년 *(\d+)월 *(\d+)일'
+            date_match = re.search(date_pattern, normalize('NFD', title))
+            if not date_match:
+                raise ValueError(f"날짜 파싱에 실패하였습니다. `{date_pattern}` 을 기대했으나, `{normalize('', title)}`이 삽입되었습니다.")
+            d = date_match.groups()
+            meal_date = datetime.strptime(f"{d[0]}-{d[1]}-{d[2]}", '%Y-%m-%d').date() or None
+            daily_meals['datestring'] = normalize('NFD', title)
             daily_meals['date'] = meal_date
 
             # * 조식
@@ -78,8 +84,8 @@ class BUFSMeals:
                 menu = menu_td[-1].find(recursive=True).text.strip()
                 
                 # print(f'(조식) {corner.text.strip() or "CORNER ?"} : {menu.text.strip() or "???"}')
-                if normalize('NFC', menu) not in ['-' or '미운영']:
-                    breakfasts.append({'menu': normalize('NFC', menu), 'corner': normalize('NFC', corner)})
+                if normalize('NFD', menu) not in ['-' or '미운영']:
+                    breakfasts.append({'menu': normalize('NFD', menu), 'corner': normalize('NFD', corner)})
             
             daily_meals['breakfast'] = breakfasts
             
@@ -118,8 +124,8 @@ class BUFSMeals:
                         corner = corner_candidate
 
                 # print(f'{corner or "CORNER ?"} : {menu or "???"}')
-                if normalize('NFC', menu) not in ['미운영', '-']:
-                    lunches.append({'corner': normalize('NFKC', corner), 'menu': normalize('NFC', menu)})
+                if normalize('NFD', menu) not in ['미운영', '-']:
+                    lunches.append({'corner': normalize('NFKC', corner), 'menu': normalize('NFD', menu)})
             
             daily_meals['lunch'] = lunches
             weekly_meals.append(daily_meals)
@@ -131,13 +137,19 @@ class BUFSMeals:
             
             # 날짜
             date = row.find_all(recursive=False)[0].text.strip()
-            meal_date = datetime.strptime(normalize('NFC', date)[:-3], '%m/%d').date() or None
+            # 연월일 날짜 파싱
+            date_pattern = r'(\d+)/(\d+)'
+            date_match = re.search(date_pattern, normalize('NFD', date))
+            if not date_match:
+                raise ValueError(f"날짜 파싱에 실패하였습니다. `{date_pattern}` 을 기대했으나, `{normalize('NFD', date)}`이 삽입되었습니다.")
+            d = date_match.groups()
+            meal_date = datetime.strptime(f"{d[0]}-{d[1]}", '%m-%d').date() or None
             meal_date = meal_date.replace(year=datetime.today().year)
-            daily_employee['datestring'] = normalize('NFC', date)
+            daily_employee['datestring'] = normalize('NFD', date)
             daily_employee['date'] = meal_date
             
             # 식단
-            meal_menu = normalize('NFC', row.find_all(recursive=False)[2].text.strip())
+            meal_menu = normalize('NFD', row.find_all(recursive=False)[2].text.strip())
             while(meal_menu[0] in '\ufeff\u200b '): meal_menu = meal_menu[1:]  # 불필요한 문자열 제거
             daily_employee['menu'] = meal_menu
 
